@@ -7,13 +7,14 @@ import AdminDashboard from './pages/AdminDashboard';
 import Favorites from './pages/Favorites';
 import History from './pages/History';
 import PlaylistDetail from './pages/PlaylistDetail';
+import Search from './pages/Search';
 import UploadSongModal from './components/UploadSongModal';
 import AudioController from './components/AudioController';
 import HeartBurst from './components/HeartBurst';
 import Toast from './components/Toast';
 import { useAuthStore } from './store/useAuthStore';
 import { useMusicStore } from './store/useMusicStore';
-import { Heart, Plus, ListMusic, Sparkles } from 'lucide-react';
+import { Heart, Plus, ListMusic, Sparkles, Home, Search as SearchIcon, Clock } from 'lucide-react';
 
 function App() {
   const navigate = useNavigate();
@@ -60,6 +61,15 @@ function App() {
   const isArtist = user?.role === 'artist';
   const isVerifiedArtist = (isArtist && user?.status === 'verified') || isAdmin;
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 5) return 'Good Night';
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    if (hour < 22) return 'Good Evening';
+    return 'Good Night';
+  };
+
   const handleAddToPlaylist = async (songId, playlistId) => {
     try {
       await addSongToPlaylist(playlistId, songId);
@@ -68,6 +78,15 @@ function App() {
       // No alert needed, handled in store
     }
   };
+
+  const songsByGenre = songs.reduce((acc, song) => {
+    const genre = song.genre || 'Other';
+    if (!acc[genre]) {
+      acc[genre] = [];
+    }
+    acc[genre].push(song);
+    return acc;
+  }, {});
 
   return (
     <div style={{
@@ -83,7 +102,7 @@ function App() {
 
       <Sidebar />
       
-      <main style={{
+      <main className="main-content" style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
@@ -93,7 +112,7 @@ function App() {
         background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.05) 0%, transparent 40%)'
       }}>
         {/* Top Header */}
-        <header style={{
+        <header className="header-container" style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -105,7 +124,7 @@ function App() {
              <button onClick={() => navigate(1)} className="glass-effect" style={{ padding: '8px', borderRadius: '50%', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>&gt;</button>
           </div>
           
-          <div style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'center' }}>
+          <div className="header-actions" style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'center' }}>
              {isAdmin && (
                <button 
                  onClick={() => navigate('/admin')}
@@ -149,14 +168,15 @@ function App() {
         <Routes>
           <Route path="/admin" element={isAdmin ? <AdminDashboard onUploadClick={() => setIsUploadOpen(true)} /> : <div style={{ color: 'white', padding: '40px' }}>Access Denied</div>} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/history" element={<History />} />
           <Route path="/playlist/:id" element={<PlaylistDetail />} />
 
           <Route path="*" element={
             <>
               <section style={{ marginBottom: 'var(--space-xl)' }}>
-                <h2 style={{ fontSize: '28px', marginBottom: 'var(--space-lg)', color: 'white' }}>Good Evening</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
+                <h2 style={{ fontSize: '28px', marginBottom: 'var(--space-lg)', color: 'white' }}>{getGreeting()}</h2>
+                <div className="recommendation-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
                   {loading ? (
                     Array(4).fill(0).map((_, i) => <Skeleton key={i} height="64px" />)
                   ) : (
@@ -179,7 +199,7 @@ function App() {
                        <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--accent-secondary)', textTransform: 'uppercase' }}>AI Enhanced</span>
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 'var(--space-xl)' }}>
+                  <div className="song-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 'var(--space-xl)' }}>
                     {aiRecommendations.map((song) => (
                       <SongCard 
                         key={`ai-${song._id}`} 
@@ -202,7 +222,7 @@ function App() {
 
               <section>
                 <h2 style={{ fontSize: '24px', marginBottom: 'var(--space-lg)', color: 'white' }}>Recently Played</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 'var(--space-xl)' }}>
+                <div className="song-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 'var(--space-xl)' }}>
                   {loading ? (
                     Array(5).fill(0).map((_, i) => <Skeleton key={i} height="240px" />)
                   ) : history.length > 0 ? (
@@ -234,12 +254,57 @@ function App() {
                 </div>
               </section>
 
+              {isAuthenticated && Object.keys(songsByGenre).map(genre => (
+                <section key={`genre-section-${genre}`} style={{ marginTop: 'var(--space-xl)', marginBottom: 'var(--space-xl)' }}>
+                  <h2 style={{ fontSize: '24px', marginBottom: 'var(--space-lg)', color: 'white', textTransform: 'capitalize' }}>{genre}</h2>
+                  <div className="song-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 'var(--space-xl)' }}>
+                    {loading ? (
+                       Array(5).fill(0).map((_, i) => <Skeleton key={`sk-${genre}-${i}`} height="240px" />)
+                    ) : songsByGenre[genre].map(song => (
+                      <SongCard 
+                        key={`genre-${genre}-${song._id}`} 
+                        songId={song._id}
+                        title={song.title} 
+                        artist={song.artist} 
+                        cover={song.coverImageUrl}
+                        isLiked={likedSongs.includes(song._id)}
+                        onLike={() => toggleFavorite(song._id)}
+                        onClick={() => setCurrentSong(song)}
+                        playlists={playlists}
+                        onAddToPlaylist={(pid) => handleAddToPlaylist(song._id, pid)}
+                        isAuthenticated={isAuthenticated}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))}
+
             </>
           } />
         </Routes>
       </main>
 
       <Player />
+      
+      {/* Mobile Navigation */}
+      <div className="mobile-nav">
+        <div onClick={() => navigate('/')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: 'white' }}>
+          <Home size={20} />
+          <span style={{ fontSize: '10px' }}>Home</span>
+        </div>
+        <div onClick={() => navigate('/search')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: 'var(--text-secondary)' }}>
+          <SearchIcon size={20} />
+          <span style={{ fontSize: '10px' }}>Search</span>
+        </div>
+        <div onClick={() => navigate('/favorites')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: 'var(--text-secondary)' }}>
+          <Heart size={20} />
+          <span style={{ fontSize: '10px' }}>Liked</span>
+        </div>
+        <div onClick={() => navigate('/history')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: 'var(--text-secondary)' }}>
+          <Clock size={20} />
+          <span style={{ fontSize: '10px' }}>History</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -254,7 +319,7 @@ const RecommendationCard = ({ title, onClick }) => (
 const SongCard = ({ title, artist, cover, onClick, isLiked, onLike, songId, playlists, onAddToPlaylist, isAuthenticated, isAI }) => {
   const [showPlaylists, setShowPlaylists] = useState(false);
   const [isBursting, setIsBursting] = useState(false);
-  const API_URL = 'http://localhost:3000';
+  const API_URL = 'http://192.168.1.14:3000';
 
   const handleLike = (e) => {
     e.stopPropagation();
@@ -269,7 +334,8 @@ const SongCard = ({ title, artist, cover, onClick, isLiked, onLike, songId, play
     <div className="premium-card" style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)', padding: 'var(--space-md)', cursor: 'pointer' }} onClick={onClick}>
       <div style={{ position: 'relative' }}>
         <img 
-          src={cover ? `${API_URL}/${cover}` : ''} 
+          src={cover ? (cover.startsWith('http') ? cover : `${API_URL}/${cover}`) : '/default-cover.png'} 
+          onError={(e) => { e.target.src = '/default-cover.png'; e.target.onerror = null; }}
           alt={title}
           style={{ aspectRatio: '1', width: '100%', borderRadius: '8px', objectFit: 'cover', backgroundColor: 'var(--bg-elevated)', marginBottom: 'var(--space-xs)', backgroundImage: 'linear-gradient(135deg, #3f3f46, #18181b)' }} 
         />

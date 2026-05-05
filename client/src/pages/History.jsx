@@ -5,7 +5,7 @@ import { useMusicStore } from '../store/useMusicStore';
 
 const History = () => {
   const { history, fetchHistory, setCurrentSong, isPlaying, currentSong } = useMusicStore();
-  const API_URL = 'http://localhost:3000';
+  const API_URL = 'http://192.168.1.14:3000';
 
   useEffect(() => {
     fetchHistory();
@@ -78,7 +78,8 @@ const History = () => {
                     <td style={{ padding: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <img 
-                          src={`${API_URL}/${song.coverImageUrl}`} 
+                          src={song.coverImageUrl ? (song.coverImageUrl.startsWith('http') ? song.coverImageUrl : `${API_URL}/${song.coverImageUrl}`) : '/default-cover.png'} 
+                          onError={(e) => { e.target.src = '/default-cover.png'; e.target.onerror = null; }}
                           alt={song.title} 
                           style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }}
                         />

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://192.168.1.14:3000';
 
 export const useMusicStore = create(
   persist(
@@ -123,6 +123,51 @@ export const useMusicStore = create(
         } catch (err) {
           const errorMessage = err.response?.data?.message || err.message || 'Upload failed';
           set({ error: errorMessage, loading: false, uploadProgress: 0 });
+          throw err;
+        }
+      },
+
+      updateSong: async (id, formData) => {
+        set({ loading: true, error: null, uploadProgress: 0 });
+        const token = localStorage.getItem('token');
+        try {
+          const response = await axios.put(`${API_URL}/songs/${id}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${token}`
+            },
+            onUploadProgress: (progressEvent) => {
+              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              set({ uploadProgress: progress });
+            }
+          });
+          set({ loading: false, uploadProgress: 100 });
+          get().fetchSongs();
+          get().showToast('Song updated successfully');
+        } catch (err) {
+          const errorMessage = err.response?.data?.message || err.message || 'Update failed';
+          set({ error: errorMessage, loading: false, uploadProgress: 0 });
+          get().showToast('Failed to update song', 'error');
+          throw err;
+        }
+      },
+
+      deleteSong: async (id) => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+          await axios.delete(`${API_URL}/songs/${id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          get().fetchSongs();
+          get().showToast('Song deleted successfully');
+          // If deleted song is currently playing, stop it
+          if (get().currentSong?._id === id) {
+            set({ currentSong: null, isPlaying: false });
+          }
+        } catch (err) {
+          console.error('Failed to delete song:', err);
+          get().showToast('Failed to delete song', 'error');
           throw err;
         }
       },

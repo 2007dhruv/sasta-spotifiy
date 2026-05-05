@@ -32,6 +32,22 @@ export class SongsService {
     return this.songModel.find({ genre }).exec();
   }
 
+  async update(id: string, updateData: any): Promise<SongDocument> {
+    const updatedSong = await this.songModel.findByIdAndUpdate(id, updateData, { returnDocument: 'after' }).exec();
+    if (!updatedSong) {
+      throw new NotFoundException('Song not found');
+    }
+    return updatedSong;
+  }
+
+  async delete(id: string): Promise<SongDocument> {
+    const deletedSong = await this.songModel.findByIdAndDelete(id).exec();
+    if (!deletedSong) {
+      throw new NotFoundException('Song not found');
+    }
+    return deletedSong;
+  }
+
   /**
    * Real-time Interaction Tracking for AI Learning
    */
@@ -61,7 +77,7 @@ export class SongsService {
     return this.interactionModel.findOneAndUpdate(
       { userId, songId },
       update,
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     ).exec();
   }
 }

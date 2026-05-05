@@ -15,14 +15,14 @@ const AudioController = () => {
     playNext
   } = useMusicStore();
 
-  const API_URL = 'http://localhost:3000';
+  const API_URL = 'http://192.168.1.14:3000';
   const hasRestoredSession = useRef(false);
 
   // Restore Session on Mount
   useEffect(() => {
     if (!hasRestoredSession.current && audioRef.current && currentSong && currentTime > 0) {
       // Set the source manually for rehydration
-      audioRef.current.src = `${API_URL}/${currentSong.audioUrl}`;
+      audioRef.current.src = currentSong.audioUrl.startsWith('http') ? currentSong.audioUrl : `${API_URL}/${currentSong.audioUrl}`;
       audioRef.current.currentTime = currentTime;
       hasRestoredSession.current = true;
     }
@@ -52,8 +52,8 @@ const AudioController = () => {
     if (!audioRef.current || !currentSong) return;
     
     // Construct the full URL
-    // audioUrl in DB is like 'uploads/songs/...'
-    const audioSrc = `${API_URL}/${currentSong.audioUrl}`;
+    // audioUrl in DB is like 'uploads/songs/...' or an absolute URL
+    const audioSrc = currentSong.audioUrl.startsWith('http') ? currentSong.audioUrl : `${API_URL}/${currentSong.audioUrl}`;
     audioRef.current.src = audioSrc;
     
     if (isPlaying) {

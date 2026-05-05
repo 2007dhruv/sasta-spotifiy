@@ -9,6 +9,9 @@ import {
   UseGuards,
   Req,
   ForbiddenException,
+  Param,
+  Delete,
+  Put,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { SongsService } from './songs.service';
@@ -81,6 +84,53 @@ export class SongsController {
       coverImageUrl: coverImageUrl?.replace(/\\/g, '/'),
       uploadedBy: req.user._id,
     });
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'audio', maxCount: 1 },
+        { name: 'cover', maxCount: 1 },
+      ],
+      {
+        storage: diskStorage({
+          destination: (req, file, cb) => {
+            const dest = file.fieldname === 'audio' ? './uploads/songs' : './uploads/covers';
+            cb(null, dest);
+          },
+          filename: (req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
+          },
+        }),
+      },
+    ),
+  )
+  async update(
+    @Param('id') id: string,
+    @UploadedFiles() files: { audio?: Express.Multer.File[]; cover?: Express.Multer.File[] },
+    @Body() body: any,
+  ) {
+    const updateData = { ...body };
+    
+    if (files?.audio?.[0]) {
+      updateData.audioUrl = files.audio[0].path.replace(/\\/g, '/');
+    }
+    if (files?.cover?.[0]) {
+      updateData.coverImageUrl = files.cover[0].path.replace(/\\/g, '/');
+    }
+
+    return this.songsService.update(id, updateData);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async delete(@Param('id') id: string) {
+    return this.songsService.delete(id);
   }
 
   @Get()

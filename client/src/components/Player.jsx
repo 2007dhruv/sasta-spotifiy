@@ -9,7 +9,7 @@ const Player = () => {
     seekTo, playNext, playPrevious, likedSongs, toggleFavorite, addToHistory 
   } = useMusicStore();
   const [isBursting, setIsBursting] = useState(false);
-  const API_URL = 'http://localhost:3000';
+  const API_URL = 'http://192.168.1.14:3000';
   const lastTrackRef = useRef(null);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const Player = () => {
   const progress = (currentTime / duration) * 100 || 0;
 
   if (!currentSong) return (
-    <div className="glass-effect" style={{
+    <div className="glass-effect player-container" style={{
       position: 'fixed', bottom: 0, left: 0, width: '100vw', height: '90px',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '0 var(--space-xl)', borderTop: '1px solid var(--border-subtle)', zIndex: 1000,
@@ -60,15 +60,16 @@ const Player = () => {
   );
 
   return (
-    <div className="glass-effect" style={{
+    <div className="glass-effect player-container" style={{
       position: 'fixed', bottom: 0, left: 0, width: '100vw', height: '90px',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 var(--space-xl)', borderTop: '1px solid var(--border-subtle)', zIndex: 1000
     }}>
       {/* Current Song Info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', width: '30%' }}>
+      <div className="player-info" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', width: '30%' }}>
         <img 
-          src={`${API_URL}/${currentSong.coverImageUrl}`} 
+          src={currentSong.coverImageUrl ? (currentSong.coverImageUrl.startsWith('http') ? currentSong.coverImageUrl : `${API_URL}/${currentSong.coverImageUrl}`) : '/default-cover.png'} 
+          onError={(e) => { e.target.src = '/default-cover.png'; e.target.onerror = null; }}
           alt={currentSong.title}
           style={{ width: '56px', height: '56px', borderRadius: '4px', objectFit: 'cover', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}
         />
@@ -104,7 +105,7 @@ const Player = () => {
       </div>
 
       {/* Controls */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex: 1 }}>
+      <div className="player-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-lg)' }}>
           <Shuffle size={18} style={{ color: 'var(--text-secondary)', cursor: 'pointer' }} />
           <SkipBack onClick={playPrevious} size={22} style={{ fill: 'currentColor', cursor: 'pointer' }} />
@@ -139,7 +140,7 @@ const Player = () => {
       </div>
 
       {/* Volume Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', width: '30%', justifyContent: 'flex-end' }}>
+      <div className="player-extra" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', width: '30%', justifyContent: 'flex-end' }}>
         <ListMusic size={18} style={{ color: 'var(--text-secondary)', cursor: 'pointer' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', minWidth: '120px' }}>
           <Volume2 size={18} style={{ color: 'var(--text-secondary)' }} />

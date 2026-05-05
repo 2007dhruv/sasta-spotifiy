@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, X } from 'lucide-react';
 
@@ -8,7 +9,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
   const accentColor = type === 'danger' ? '#ef4444' : 'var(--accent-primary)';
   const softColor = type === 'danger' ? 'rgba(239, 68, 68, 0.1)' : 'var(--accent-soft)';
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <div style={{
         position: 'fixed',
@@ -119,7 +120,8 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

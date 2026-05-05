@@ -25,7 +25,7 @@ export class UsersService {
   }
 
   async updateUserStatus(id: string, update: { role?: string; status?: string }): Promise<UserDocument | null> {
-    return this.userModel.findByIdAndUpdate(id, update, { new: true }).exec();
+    return this.userModel.findByIdAndUpdate(id, update, { returnDocument: 'after' }).exec();
   }
 
   async findAllArtists(): Promise<UserDocument[]> {
@@ -43,14 +43,14 @@ export class UsersService {
       return this.userModel.findByIdAndUpdate(
         userId,
         { $pull: { likedSongs: new Types.ObjectId(songId) } },
-        { new: true }
+        { returnDocument: 'after' }
       ).exec();
     } else {
       await this.recordInteraction(userId, songId, { isLiked: true });
       return this.userModel.findByIdAndUpdate(
         userId,
         { $addToSet: { likedSongs: new Types.ObjectId(songId) } },
-        { new: true }
+        { returnDocument: 'after' }
       ).exec();
     }
   }
@@ -77,7 +77,7 @@ export class UsersService {
     return this.userModel.findByIdAndUpdate(
       userId,
       { listeningHistory: newHistory },
-      { new: true }
+      { returnDocument: 'after' }
     ).populate('listeningHistory.song').exec();
   }
 
@@ -111,7 +111,7 @@ export class UsersService {
     return this.interactionModel.findOneAndUpdate(
       { userId, songId },
       update,
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     ).exec();
   }
 }

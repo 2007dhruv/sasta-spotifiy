@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ListMusic } from 'lucide-react';
 
@@ -16,7 +17,7 @@ const CreatePlaylistModal = ({ isOpen, onClose, onCreate }) => {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <div style={{
         position: 'fixed',
@@ -153,7 +154,8 @@ const CreatePlaylistModal = ({ isOpen, onClose, onCreate }) => {
           </form>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

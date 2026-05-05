@@ -46,7 +46,7 @@ const Sidebar = () => {
 
 
   return (
-    <div className="glass-effect" style={{
+    <div className="glass-effect sidebar-container" style={{
       width: '240px',
       height: '100%',
       display: 'flex',
@@ -67,7 +67,12 @@ const Sidebar = () => {
           active={location.pathname === '/'} 
           onClick={() => navigate('/')} 
         />
-        <SidebarLink icon={<Search size={22} />} label="Search" />
+        <SidebarLink 
+          icon={<Search size={22} />} 
+          label="Search" 
+          active={location.pathname === '/search'} 
+          onClick={() => navigate('/search')} 
+        />
         <SidebarLink 
           icon={<Clock size={22} />} 
           label="History" 

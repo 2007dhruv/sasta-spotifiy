@@ -9,7 +9,7 @@ const PlaylistDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { activePlaylist, fetchPlaylistDetail, setCurrentSong, removeSongFromPlaylist, isPlaying, currentSong, deletePlaylist, loading, showToast } = useMusicStore();
-  const API_URL = 'http://localhost:3000';
+  const API_URL = 'http://192.168.1.14:3000';
   const [error, setError] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
 
@@ -85,7 +85,7 @@ const PlaylistDetail = () => {
       </div>
 
       {/* Hero Section */}
-      <section style={{
+      <section className="hero-flex" style={{
         padding: '20px 32px 32px',
         display: 'flex',
         alignItems: 'flex-end',
@@ -97,7 +97,7 @@ const PlaylistDetail = () => {
           style={{
             width: '232px',
             height: '232px',
-            background: firstSongCover ? `url(${API_URL}/${firstSongCover})` : 'linear-gradient(135deg, #27272a 0%, #09090b 100%)',
+            background: firstSongCover ? `url(${firstSongCover.startsWith('http') ? firstSongCover : `${API_URL}/${firstSongCover}`})` : 'linear-gradient(135deg, #27272a 0%, #09090b 100%)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             borderRadius: '12px',
@@ -192,7 +192,8 @@ const PlaylistDetail = () => {
                       <td style={{ padding: '12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <img 
-                            src={`${API_URL}/${song.coverImageUrl}`} 
+                            src={song.coverImageUrl ? (song.coverImageUrl.startsWith('http') ? song.coverImageUrl : `${API_URL}/${song.coverImageUrl}`) : '/default-cover.png'} 
+                            onError={(e) => { e.target.src = '/default-cover.png'; e.target.onerror = null; }}
                             alt={song.title} 
                             style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }}
                           />

@@ -132,3 +132,114 @@ p {
   0%, 100% { opacity: 0.2; }
   50% { opacity: 0.5; }
 }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto; /* Allow scrolling on mobile */
+  }
+
+  .sidebar-container {
+    display: none !important; /* Hide sidebar on mobile */
+  }
+
+  .main-content {
+    padding: var(--space-md) !important;
+    padding-bottom: 160px !important; /* Extra space for mobile player */
+  }
+
+  .header-container {
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: flex-start !important;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .song-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: var(--space-md) !important;
+  }
+
+  .recommendation-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .player-container {
+    height: auto !important;
+    padding: var(--space-sm) !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+    border-top: 1px solid var(--border-bright) !important;
+    flex-direction: column !important;
+    gap: var(--space-sm) !important;
+  }
+
+  .player-info {
+    width: 100% !important;
+  }
+
+  .player-controls {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .player-extra {
+    display: none !important; /* Hide volume/extra on mobile player */
+  }
+
+  .mobile-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 64px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+    z-index: 100;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 var(--space-md);
+  }
+}
+
+.mobile-nav {
+  display: none;
+}
+
+/* Table & List Mobile Fixes */
+@media (max-width: 600px) {
+  th:nth-child(3), td:nth-child(3),
+  th:nth-child(4), td:nth-child(4) {
+    display: none;
+  }
+  
+  .hero-flex {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: var(--space-md) !important;
+    padding: 32px 16px !important;
+  }
+  
+  .hero-flex h1 {
+    font-size: 36px !important;
+    letter-spacing: -1px !important;
+  }
+  
+  .hero-flex img, .hero-flex .hero-art {
+    width: 160px !important;
+    height: 160px !important;
+  }
+}
